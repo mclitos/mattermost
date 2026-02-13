@@ -1,0 +1,50 @@
+version: "3.3"
+
+services: 
+
+  mattermost: 
+    depends_on: 
+      - postgres
+    env_file: 
+      - .env
+    environment:
+      - PUID=0   # default 1000  root=0
+      - PGID=0   # default 1000  root=0
+      - TZ=Europe/Berlin
+    image: "mattermost/mattermost-team-edition:8.0"
+    container_name: mattermost
+    pids_limit: 200
+    ports: 
+      - "8065:8065"
+    read_only: false
+    restart: unless-stopped
+    security_opt: 
+      - "no-new-privileges:true"
+    tmpfs: 
+      - /tmp
+    volumes: 
+      - "/opt/docker/docker_data/mattermost/config:/mattermost/config:rw"
+      - "/opt/docker/docker_data/mattermost/data:/mattermost/data:rw"
+      - "/opt/docker/docker_data/mattermost/logs:/mattermost/logs:rw"
+      - "/opt/docker/docker_data/mattermost/plugins:/mattermost/plugins:rw"
+      - "/opt/docker/docker_data/mattermost/client/plugins:/mattermost/client/plugins:rw"
+      - "/opt/docker/docker_data/mattermost/bleve-indexes:/mattermost/bleve-indexes:rw"
+
+  postgres: 
+    env_file: 
+      - .env
+    image: "postgres:15.3"
+    container_name: matter-db
+    pids_limit: 100
+    read_only: true
+    restart: unless-stopped
+    security_opt: 
+      - "no-new-privileges:true"
+    tmpfs: 
+      - /tmp
+    volumes: 
+      - "/opt/docker/docker_data/postgresql/data:/var/lib/postgresql/data"
+      - "lock:/var/run/postgresql"
+
+volumes: 
+  lock: ~
